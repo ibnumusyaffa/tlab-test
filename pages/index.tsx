@@ -1,118 +1,281 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import Image from "next/image";
+import { Inter } from "next/font/google";
+import axios from "axios";
+import React, { useEffect } from "react";
+import { useQuery } from "react-query";
+const inter = Inter({ subsets: ["latin"] });
 
-const inter = Inter({ subsets: ['latin'] })
+type Game = {
+  id: number;
+  title: string;
+  thumbnail: string;
+  short_description: string;
+  game_url: string;
+  genre: string;
+  platform: string;
+  publisher: string;
+  developer: string;
+  release_date: string;
+  freetogame_profile_url: string;
+};
+
+const category = [
+  "mmorpg",
+  "shooter",
+  "strategy",
+  "moba",
+  "racing",
+  "sports",
+  "social",
+  "sandbox",
+  "open-world",
+  "survival",
+  "pvp",
+  "pve",
+  "pixel",
+  "voxel",
+  "zombie",
+  "turn-based",
+  "first-person",
+  "third-person",
+  "top-down",
+  "tank",
+  "space",
+  "sailing",
+  "side-scroller",
+  "superhero",
+  "permadeath",
+  "card",
+  "battle-royale",
+  "mmo",
+  "mmofps",
+  "mmotps",
+  "3d",
+  "2d",
+  "anime",
+  "fantasy",
+  "sci-fi",
+  "fighting",
+  "action-rpg",
+  "action",
+  "military",
+  "martial-arts",
+  "flight",
+  "low-spec",
+  "tower-defense",
+  "horror",
+  "mmorts",
+];
+
+async function getData(category: string): Promise<Game[]> {
+  const response = await axios.get(
+    "https://free-to-play-games-database.p.rapidapi.com/api/games",
+    {
+      params: {
+        category: category ? category : undefined,
+      },
+      headers: {
+        "X-RapidAPI-Key": "6ca948ceb7msh426f11ced47c1b7p13741cjsnf6f65942f5df",
+        "X-RapidAPI-Host": "free-to-play-games-database.p.rapidapi.com",
+      },
+    }
+  );
+
+  return response.data.slice(0, 10);
+}
+
+function Logo() {
+  return (
+    <svg
+      width="40"
+      height="40"
+      viewBox="0 0 40 40"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clip-path="url(#clip0_49_108)">
+        <path
+          d="M6.76153 26.7326C5.87731 26.7479 4.99891 26.5867 4.17757 26.2586C3.35623 25.9304 2.6084 25.4418 1.97771 24.8212C1.34701 24.2007 0.84608 23.4607 0.504137 22.6443C0.162193 21.8279 -0.013916 20.9515 -0.013916 20.0663C-0.013916 19.181 0.162193 18.3047 0.504137 17.4883C0.84608 16.6719 1.34701 15.9319 1.97771 15.3113C2.6084 14.6908 3.35623 14.2022 4.17757 13.874C4.99891 13.5458 5.87731 13.3847 6.76153 13.3999H20.0967C21.8632 13.3999 23.5574 14.1024 24.8065 15.3528C26.0556 16.6031 26.7574 18.299 26.7574 20.0673V33.4019C26.7273 35.1506 26.0122 36.8174 24.7662 38.0434C23.5201 39.2693 21.8429 39.9563 20.0957 39.9563C18.3486 39.9563 16.6713 39.2693 15.4253 38.0434C14.1793 36.8174 13.4642 35.1506 13.4341 33.4019C13.4346 32.5261 13.2627 31.6588 12.9282 30.8495C12.5936 30.0403 12.1031 29.3049 11.4845 28.6856C10.8659 28.0662 10.1314 27.5749 9.32309 27.2398C8.51474 26.9047 7.64833 26.7324 6.7734 26.7326H6.76153Z"
+          fill="#00DE9C"
+        />
+        <path
+          d="M33.3843 26.7327C35.1508 26.7327 36.845 26.0303 38.0941 24.7799C39.3432 23.5295 40.045 21.8337 40.045 20.0654C40.045 18.2971 39.3432 16.6013 38.0941 15.3509C36.845 14.1005 35.1508 13.3981 33.3843 13.3981H33.4061C32.5315 13.3983 31.6654 13.2261 30.8573 12.8913C30.0492 12.5564 29.3149 12.0655 28.6964 11.4465C28.0779 10.8276 27.5872 10.0927 27.2525 9.2839C26.9177 8.47509 26.7454 7.6082 26.7454 6.73273C26.7454 4.96444 26.0437 3.26858 24.7945 2.01821C23.5454 0.767847 21.8513 0.0653992 20.0847 0.0653992C18.3182 0.0653992 16.6241 0.767847 15.3749 2.01821C14.1258 3.26858 13.4241 4.96444 13.4241 6.73273V15.9406C13.4241 16.4818 13.5306 17.0176 13.7374 17.5176C13.9443 18.0176 14.2476 18.4718 14.6298 18.8545C15.0121 19.2371 15.4659 19.5407 15.9654 19.7478C16.4648 19.9549 17.0001 20.0614 17.5407 20.0614H18.0155C18.2857 20.0614 18.5532 20.1147 18.8028 20.2182C19.0524 20.3217 19.2792 20.4734 19.4703 20.6646C19.6613 20.8559 19.8129 21.0829 19.9163 21.3327C20.0197 21.5826 20.0729 21.8504 20.0729 22.1208V22.604C20.0718 23.1455 20.1774 23.6819 20.3836 24.1825C20.5898 24.6831 20.8925 25.1381 21.2744 25.5216C21.6564 25.905 22.1101 26.2093 22.6096 26.4172C23.1091 26.625 23.6446 26.7322 24.1856 26.7327H33.3843Z"
+          fill="#049CFB"
+        />
+        <path
+          d="M26.7573 20.0733C26.7573 18.305 26.0555 16.6092 24.8064 15.3588C23.5573 14.1084 21.8631 13.406 20.0966 13.406H13.4241V15.9505C13.4241 17.0434 13.8578 18.0916 14.6298 18.8644C15.4018 19.6372 16.4489 20.0713 17.5407 20.0713H18.0155C18.2857 20.0713 18.5532 20.1246 18.8028 20.2281C19.0524 20.3316 19.2792 20.4833 19.4703 20.6745C19.6613 20.8657 19.8129 21.0928 19.9163 21.3426C20.0197 21.5925 20.0729 21.8603 20.0729 22.1307V22.6139C20.0734 23.7058 20.5068 24.7528 21.2779 25.5251C22.049 26.2973 23.0948 26.7317 24.1856 26.7327H26.7573V20.0733Z"
+          fill="#5449D6"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_49_108">
+          <rect width="40" height="40" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+}
+
+function SocialMedia() {
+  return (
+    <svg
+      width="132"
+      height="24"
+      viewBox="0 0 132 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clip-path="url(#clip0_49_75)">
+        <path
+          d="M23.8425 6.97453C23.8425 4.86516 22.291 3.16828 20.3738 3.16828C17.7769 3.04687 15.1285 3 12.4219 3H11.5782C8.87817 3 6.22504 3.04687 3.62817 3.16875C1.71567 3.16875 0.164103 4.875 0.164103 6.98437C0.0469159 8.65266 -0.00277159 10.3214 4.091e-05 11.9902C-0.00464659 13.6589 0.0484784 15.3292 0.159416 17.0011C0.159416 19.1105 1.71098 20.8214 3.62348 20.8214C6.3516 20.948 9.15004 21.0042 11.9954 20.9995C14.8454 21.0089 17.636 20.9495 20.3672 20.8214C22.2844 20.8214 23.836 19.1105 23.836 17.0011C23.9485 15.3277 24 13.6589 23.9954 11.9855C24.006 10.3167 23.955 8.64641 23.8425 6.97453ZM9.70317 16.5886V7.37766L16.5 11.9808L9.70317 16.5886Z"
+          fill="#373B59"
+        />
+      </g>
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M55.4405 4.55155C54.4697 3.58033 53.3165 2.81071 52.0471 2.287C50.7777 1.76328 49.4172 1.49581 48.0441 1.49999C42.2812 1.49999 37.59 6.1678 37.5877 11.9062C37.5851 13.7335 38.0668 15.5288 38.9836 17.1094L37.5 22.5L43.043 21.053C44.5773 21.8842 46.2948 22.3192 48.0398 22.3186H48.0441C53.8064 22.3186 58.4972 17.6503 58.5 11.9123C58.5035 10.5438 58.2348 9.18832 57.7095 7.92465C57.1843 6.66097 56.413 5.51436 55.4405 4.55155ZM48.0441 20.5622H48.0403C46.4847 20.5626 44.9574 20.1463 43.6172 19.3566L43.2998 19.1691L40.0106 20.0278L40.8886 16.8361L40.6819 16.508C39.8121 15.1309 39.3512 13.535 39.353 11.9062C39.353 7.13764 43.2534 3.2578 48.0473 3.2578C50.347 3.25369 52.5542 4.16321 54.1833 5.78629C55.8125 7.40938 56.7302 9.61312 56.7347 11.9128C56.7328 16.6819 52.8342 20.5622 48.0441 20.5622ZM52.8108 14.0845C52.5497 13.9542 51.2639 13.3251 51.0258 13.2384C50.7877 13.1517 50.6119 13.1081 50.438 13.3687C50.2641 13.6294 49.763 14.2125 49.6106 14.3883C49.4583 14.5641 49.3059 14.5833 49.0448 14.453C48.7838 14.3226 47.9414 14.0484 46.9434 13.1625C46.1667 12.473 45.6427 11.6217 45.4903 11.3616C45.338 11.1014 45.4739 10.9603 45.6047 10.8309C45.7223 10.7142 45.8658 10.5272 45.9966 10.3753C46.1273 10.2234 46.1709 10.1147 46.2577 9.94124C46.3444 9.7678 46.3012 9.61592 46.2361 9.48608C46.1709 9.35624 45.6483 8.07608 45.4308 7.5553C45.2184 7.04811 45.0033 7.11702 44.843 7.10905C44.6906 7.10155 44.5148 7.09968 44.3419 7.09968C44.2096 7.10312 44.0795 7.13378 43.9597 7.18975C43.8398 7.24573 43.7328 7.3258 43.6453 7.42499C43.4058 7.68561 42.7308 8.31561 42.7308 9.59436C42.7308 10.8731 43.6683 12.1106 43.7977 12.284C43.927 12.4575 45.6398 15.0839 48.2606 16.2103C48.7473 16.4187 49.2445 16.6015 49.7503 16.7578C50.3761 16.9556 50.9456 16.928 51.3956 16.8609C51.8977 16.7864 52.9425 16.2319 53.1595 15.6244C53.3766 15.0169 53.377 14.4966 53.3119 14.3883C53.2467 14.28 53.0723 14.2144 52.8108 14.0845Z"
+        fill="#373B59"
+      />
+      <path
+        d="M95.25 5.13282C94.406 5.49955 93.513 5.74116 92.5992 5.85001C93.5595 5.28769 94.2817 4.39434 94.6303 3.33751C93.7224 3.86841 92.7307 4.24092 91.6978 4.43907C91.2629 3.98322 90.7397 3.62059 90.1603 3.3732C89.5808 3.12581 88.9571 2.99884 88.327 3.00001C85.7761 3.00001 83.7117 5.03438 83.7117 7.5422C83.7099 7.89102 83.7499 8.23881 83.8308 8.57813C82.0016 8.49238 80.2104 8.02575 78.5719 7.2081C76.9333 6.39044 75.4835 5.23977 74.3152 3.8297C73.9053 4.52069 73.6885 5.30909 73.6875 6.11251C73.6875 7.68751 74.5092 9.0797 75.75 9.89532C75.0149 9.87787 74.2948 9.68331 73.6509 9.32813V9.38438C73.6509 11.5875 75.2447 13.4203 77.3541 13.8375C76.9574 13.9432 76.5486 13.9968 76.1381 13.9969C75.8468 13.9974 75.5562 13.9691 75.2705 13.9125C75.8569 15.7172 77.5636 17.0297 79.5853 17.0672C77.9425 18.3333 75.9256 19.0175 73.8516 19.0125C73.4834 19.012 73.1156 18.99 72.75 18.9469C74.8599 20.2942 77.3126 21.0068 79.8159 21C88.3172 21 92.9616 14.0766 92.9616 8.07188C92.9616 7.87501 92.9564 7.67813 92.947 7.48595C93.8485 6.84472 94.6283 6.04787 95.25 5.13282Z"
+        fill="#373B59"
+      />
+      <path
+        d="M124.375 3.24984C125.534 3.25331 126.645 3.71539 127.465 4.53517C128.285 5.35495 128.747 6.46582 128.75 7.62516V16.3748C128.747 17.5342 128.285 18.6451 127.465 19.4648C126.645 20.2846 125.534 20.7467 124.375 20.7502H115.625C114.466 20.7467 113.355 20.2846 112.535 19.4648C111.715 18.6451 111.253 17.5342 111.25 16.3748V7.62516C111.253 6.46582 111.715 5.35495 112.535 4.53517C113.355 3.71539 114.466 3.25331 115.625 3.24984H124.375ZM124.375 1.5H115.625C112.256 1.5 109.5 4.25625 109.5 7.62516V16.3748C109.5 19.7437 112.256 22.5 115.625 22.5H124.375C127.744 22.5 130.5 19.7437 130.5 16.3748V7.62516C130.5 4.25625 127.744 1.5 124.375 1.5Z"
+        fill="#373B59"
+      />
+      <path
+        d="M125.687 7.62515C125.428 7.62515 125.174 7.54818 124.958 7.40396C124.742 7.25974 124.574 7.05475 124.475 6.81492C124.375 6.5751 124.349 6.3112 124.4 6.0566C124.451 5.802 124.576 5.56813 124.759 5.38458C124.943 5.20102 125.177 5.07602 125.431 5.02537C125.686 4.97473 125.95 5.00072 126.19 5.10006C126.429 5.1994 126.634 5.36763 126.779 5.58347C126.923 5.79931 127 6.05306 127 6.31265C127 6.48512 126.967 6.65596 126.901 6.81536C126.835 6.97477 126.738 7.11961 126.616 7.24156C126.494 7.36351 126.349 7.46017 126.19 7.526C126.031 7.59183 125.86 7.62552 125.687 7.62515ZM120 8.49984C120.692 8.49984 121.369 8.70512 121.945 9.08972C122.52 9.47433 122.969 10.021 123.234 10.6605C123.499 11.3001 123.568 12.0039 123.433 12.6828C123.298 13.3618 122.964 13.9855 122.475 14.475C121.985 14.9645 121.362 15.2978 120.683 15.4329C120.004 15.568 119.3 15.4986 118.661 15.2337C118.021 14.9688 117.474 14.5202 117.09 13.9446C116.705 13.369 116.5 12.6923 116.5 12C116.501 11.072 116.87 10.1823 117.526 9.52611C118.182 8.86992 119.072 8.50083 120 8.49984ZM120 6.75C118.962 6.75 117.947 7.0579 117.083 7.63478C116.22 8.21166 115.547 9.0316 115.15 9.99091C114.752 10.9502 114.648 12.0058 114.851 13.0242C115.053 14.0426 115.553 14.9781 116.288 15.7123C117.022 16.4465 117.957 16.9465 118.976 17.1491C119.994 17.3517 121.05 17.2477 122.009 16.8504C122.968 16.453 123.788 15.7801 124.365 14.9167C124.942 14.0534 125.25 13.0383 125.25 12C125.25 10.6076 124.697 9.27225 123.712 8.28769C122.728 7.30312 121.392 6.75 120 6.75Z"
+        fill="#373B59"
+      />
+      <defs>
+        <clipPath id="clip0_49_75">
+          <rect width="24" height="24" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+}
 
 export default function Home() {
+  const [selectedCategory, setSelectedCategory] = React.useState("");
+  const { data, status } = useQuery({
+    queryKey: ["games", selectedCategory],
+    queryFn: () => getData(selectedCategory),
+  });
+
   return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className={`${inter.className} bg-[#EDF1F3] min-h-screen pb-10`}>
+      <div className="h-16 bg-white flex items-center justify-center">
+        <div className="w-2/3 flex justify-between items-center">
+          <div>
+            <Logo></Logo>
+          </div>
+          <div>
+            <SocialMedia></SocialMedia>
+          </div>
         </div>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <div className="flex flex-col items-center relative">
+        <div className="bg-[#1F7CD1] h-[300px] absolute w-full"></div>
+        <div className="w-2/3 z-10">
+          <div className="py-10 border-b border-[#C9E5FF]  flex justify-between">
+            <div className="text-white font-semibold text-lg flex items-center">
+              Pilih Game Favorit Kalian
+            </div>
+            <div className="w-1/4 text-white text-sm">
+              Lorem ipsum dolor sit amet conse ctetur adipi sicing elit
+            </div>
+          </div>
+          <div className="flex justify-between  w-full py-5">
+            <div className="text-white text-lg">Daftar Game</div>
+            <div>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="rounded"
+              >
+                <option value="">Select Category</option>;
+                {category.map((item) => {
+                  return (
+                    <option value={item} key={item}>
+                      {item}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          </div>
+          {status === "loading" ? (
+            <div className="flex items-center justify-center w-full">
+              <div role="status">
+                <svg
+                  aria-hidden="true"
+                  className="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                  viewBox="0 0 100 101"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                    fill="currentColor"
+                  />
+                  <path
+                    d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                    fill="currentFill"
+                  />
+                </svg>
+                <span className="sr-only">Loading...</span>
+              </div>
+            </div>
+          ) : null}
+          <div className="grid grid-cols-3 gap-3">
+            {status === "success" ? (
+              <React.Fragment>
+                {data.map((item) => {
+                  return (
+                    <div
+                      key={item.id}
+                      className="w-full h-auto border border-gray-200 bg-white rounded shadow-sm p-2.5"
+                    >
+                      <div className="relative">
+                        <img className="rounded" src={item.thumbnail}></img>
+                        <div className="absolute bottom-0 ml-2 mb-2.5 py-1 px-1.5 rounded-full text-xs text-blue-800 font-semibold bg-blue-100">
+                          {item.genre}
+                        </div>
+                      </div>
+                      <div className="py-2 border-b border-gray-200">
+                        <div className=" text-gray-800">{item.title}</div>
+                        <div className="text-sm text-gray-800 ">
+                          {item.short_description}
+                        </div>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <div>
+                          <div className="text-xs text-gray-600">Platform</div>
+                          <div className="text-sm text-gray-700">
+                            {item.platform}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-600">
+                            Release Date
+                          </div>
+                          <div className="text-sm text-gray-700">
+                            {item.release_date}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </React.Fragment>
+            ) : null}
+          </div>
+        </div>
       </div>
     </main>
-  )
+  );
 }
